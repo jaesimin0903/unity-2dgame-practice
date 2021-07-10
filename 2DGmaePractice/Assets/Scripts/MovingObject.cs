@@ -13,7 +13,7 @@ public abstract class MovingObject : MonoBehaviour
     private BoxCollider2D boxCollider;
     private Rigidbody2D rb2D; //객체의 움직임 레퍼런스를 담을 변수
     private float inverseMoveTime; //움직임을 효율적이게 계산하기 위한 변수
-
+    private bool isMoving;
 
     // Start is called before the first frame update
     protected virtual void Start()//자식 클래스가 덮어써서 재정의 하기 위해 start 를 다시 정의할 수도있어서
@@ -33,7 +33,7 @@ public abstract class MovingObject : MonoBehaviour
         hit = Physics2D.Linecast(start, end, blockingLayer); // 시작지점과 끝지점 까지의 라인을 가져오고 blockinglayer 와 충돌검사
         boxCollider.enabled = true; 
 
-        if(hit.transform == null)//부딪힌게 없다면
+        if(hit.transform == null && !isMoving)//부딪힌게 없다면
         {
             StartCoroutine(SmoothMovement(end));//end 방향으로 이동
             return true;
@@ -44,6 +44,7 @@ public abstract class MovingObject : MonoBehaviour
 
     protected IEnumerator SmoothMovement (Vector3 end)//객체를 움직이게 할 함수 end에 어디로 움직일지 저장
     {
+        isMoving = true;
         float sqrRemainingDistance = (transform.position - end).sqrMagnitude; // 현재위치 - end 벡터에 sqrMagnitude 로 거리계산 Magnitude : 벡터길이 , sqrMagnitude : 벡터길이 제곱 
 
         while (sqrRemainingDistance > float.Epsilon)
@@ -54,6 +55,8 @@ public abstract class MovingObject : MonoBehaviour
             sqrRemainingDistance = (transform.position - end).sqrMagnitude; // 움직인 후 남은 거리 계산 
             yield return null; //루프를 갱신하기 전에 다음 프레임을 기다림
         }
+        rb2D.MovePosition(end);
+        isMoving = false;
     }
 
     protected virtual void AttemptMove <T> (int xDir, int yDir)

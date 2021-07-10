@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class Player : MovingObject
 {
@@ -9,6 +10,15 @@ public class Player : MovingObject
     public int pointsPerFood = 10;
     public int pointsPerSoda = 20;
     public float restartLevelDelay = 1f;
+    public Text foodText;
+    public AudioClip moveSound1;
+    public AudioClip moveSound2;
+    public AudioClip eatSound1;
+    public AudioClip eatSound2;
+    public AudioClip drinkSound1;
+    public AudioClip drinkSund2;
+    public AudioClip gameOverSound;
+    
 
     private Animator animator; //에니메이터 레퍼런스를 가져오기 위한 변수
     private int food;
@@ -18,6 +28,7 @@ public class Player : MovingObject
     {
         animator = GetComponent<Animator>();
         food = GameManager1.instance.playerFoodPoints; // 해당레벨동안 음식점수를 관리할 수 있음, 레벨이 바뀔 때 마다 게임메니저에 저장 
+        foodText.text = "Food: " + food;
 
         base.Start(); // 부모 클래스의 스타트 호출
     }
@@ -47,10 +58,15 @@ public class Player : MovingObject
     protected override void AttemptMove <T> (int xDir, int yDir)
     {
         food--;//움직이면 푸드 -1
-
+        foodText.text = "Food: " + food;
         base.AttemptMove<T>(xDir, yDir);
 
         RaycastHit2D hit; // 충돌여부 변수 
+
+        if (Move (xDir, yDir, out hit))
+        {
+            SoundManager.instance.RandomizeSfx(moveSound1, moveSound2);
+        }
 
         CheckIfGameOver();
 
@@ -67,11 +83,15 @@ public class Player : MovingObject
         else if (other.tag == "Food")
         {
             food += pointsPerFood;
+            foodText.text = "+" + pointsPerFood + " Food: " + food;
+            SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
             other.gameObject.SetActive(false);//푸드, 소다 오브젝트를 비활성화
         }
         else if (other.tag == "Soda")
         {
             food += pointsPerSoda;
+            foodText.text = "+" + pointsPerSoda + " Food: " + food;
+            SoundManager.instance.RandomizeSfx(drinkSound1, drinkSund2);
             other.gameObject.SetActive(false);
         }
     }
@@ -85,20 +105,26 @@ public class Player : MovingObject
 
     private void Restart()//Exit 오브젝트와 충돌시 발생하는 함수
     {
-        SceneManager.GetActiveScene(); // 레벨을 다시 불러옴 , 이 게임에는 하나 밖에 없는 main 신을 불러옴, 많은 게임들이 이 함수를 이용해 다른 신을 불러온다
+        //SceneManager.GetActiveScene(); // 레벨을 다시 불러옴 , 이 게임에는 하나 밖에 없는 main 신을 불러옴, 많은 게임들이 이 함수를 이용해 다른 신을 불러온다
         //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
     }
 
     public void LoseFood(int loss)
     {
         animator.SetTrigger("playerHit");
         food -= loss;
+        foodText.text = "-" + loss + " Food: " + food;
         CheckIfGameOver();
     }
 
     private void CheckIfGameOver()
     {
         if (food <= 0)
+        {
+            SoundManager.instance.PlaySingle(gameOverSound);
+            SoundManager.instance.musicSource.Stop();
             GameManager1.instance.GameOver();
+        }
     }
 }

@@ -7,6 +7,8 @@ public class Enemy : MovingObject
     // Start is called before the first frame update
 
     public int playerDamage;
+    public AudioClip enemyAttack1;
+    public AudioClip enemyAttack2;
 
     private Animator animator;
     private Transform target; //플레이어 위치를 저장, 적이 어디로 향할지 알려줌
@@ -54,5 +56,6 @@ public class Enemy : MovingObject
 
         hitPlayer.LoseFood(playerDamage);//플레이어의 losefood  를 호출하고 적의 공격으로 잃어버릴 음식점수가 될 playerDamage 입력
 
+        SoundManager.instance.RandomizeSfx(enemyAttack1, enemyAttack2);
     }
 }

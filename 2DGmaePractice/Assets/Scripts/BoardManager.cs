@@ -75,7 +75,7 @@ public class BoardManager : MonoBehaviour
 
     void LayoutObjectAtRandom(GameObject[] tileArray, int minimum, int maximum)
     {
-        int objectCount = Random.Range (minimum, maximum + 1);
+        int objectCount = Random.Range (minimum, minimum+1);
 
         for (int i = 0; i <objectCount; i++)
         {
@@ -93,7 +93,7 @@ public class BoardManager : MonoBehaviour
         LayoutObjectAtRandom(foodTiles,foodCount.minimum,foodCount.maximum);
         int enemyCount = (int)Mathf.Log(level,2f);
         LayoutObjectAtRandom(enemyTiles,enemyCount,enemyCount);
-        Instantiate(exit,new Vector3(columns -1,rows-1,0F),Quaternion.identity);
+        Instantiate(exit,new Vector3(columns -1,rows-1,0f),Quaternion.identity);
     }
     // Update is called once per frame
 }
